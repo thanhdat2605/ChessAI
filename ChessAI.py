@@ -393,6 +393,7 @@ def BotSoloBot(turn = 0):
             if event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     Run = False
+            
         screen.blit(bot_solo_bot_bg, (0, 0))
         
         if not Static.stop:
