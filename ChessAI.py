@@ -6,6 +6,8 @@ rd.seed(time.time())
 
 board = chess.Board()
 
+grey = (105, 105, 105) # (127, 127, 127)
+light = (169, 169, 169)
 class Static:
     board = []
     stop = False  
@@ -35,9 +37,8 @@ bot_solo_bot_bg = pg.image.load('images/bot_solo_bot.png')
 #draw
 def draw_chess_board():
     black = (0, 0, 0)
-    yellow =  (220, 190, 0) # (0, 255, 0) # (0, 0, 185)
+    yellow =  (220, 190, 0)
     brown =  (124, 70, 0)
-    #white = (255, 255, 255)
     for i in range(0, 9):
         for j in range(0, 9):
             if i == 0 and j == 0:
@@ -115,23 +116,100 @@ def Bot1():
             print("Black win (Random)")
         Static.stop = True
         
+def reverse_array(array):
+    return array[::-1]
+
+pawn_eval_white = [
+    [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+    [5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
+    [1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
+    [0.5,  0.5,  1.0,  2.5,  2.5,  1.0,  0.5,  0.5],
+    [0.0,  0.0,  0.0,  2.0,  2.0,  0.0,  0.0,  0.0],
+    [0.5, -0.5, -1.0,  0.0,  0.0, -1.0, -0.5,  0.5],
+    [0.5,  1.0, 1.0,  -2.0, -2.0,  1.0,  1.0,  0.5],
+    [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+]
+
+pawn_eval_black = reverse_array(pawn_eval_white)
+
+knight_eval = [
+    [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0],
+    [-4.0, -2.0,  0.0,  0.0,  0.0,  0.0, -2.0, -4.0],
+    [-3.0,  0.0,  1.0,  1.5,  1.5,  1.0,  0.0, -3.0],
+    [-3.0,  0.5,  1.5,  2.0,  2.0,  1.5,  0.5, -3.0],
+    [-3.0,  0.0,  1.5,  2.0,  2.0,  1.5,  0.0, -3.0],
+    [-3.0,  0.5,  1.0,  1.5,  1.5,  1.0,  0.5, -3.0],
+    [-4.0, -2.0,  0.0,  0.5,  0.5,  0.0, -2.0, -4.0],
+    [-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0]
+]
+
+bishop_eval_white = [
+    [-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0],
+    [-1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+    [-1.0,  0.0,  0.5,  1.0,  1.0,  0.5,  0.0, -1.0],
+    [-1.0,  0.5,  0.5,  1.0,  1.0,  0.5,  0.5, -1.0],
+    [-1.0,  0.0,  1.0,  1.0,  1.0,  1.0,  0.0, -1.0],
+    [-1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0, -1.0],
+    [-1.0,  0.5,  0.0,  0.0,  0.0,  0.0,  0.5, -1.0],
+    [-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0]
+]
+
+bishop_eval_black = reverse_array(bishop_eval_white)
+
+rook_eval_white = [
+    [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+    [0.5,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.5],
+    [-0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [-0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [-0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [-0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [-0.5,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -0.5],
+    [0.0,   0.0, 0.0,  0.5,  0.5,  0.0,  0.0,  0.0]
+]
+
+rook_eval_black = reverse_array(rook_eval_white)
+
+eval_queen = [
+    [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0],
+    [-1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0],
+    [-1.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+    [-0.5,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+    [0.0,  0.0,  0.5,  0.5,  0.5,  0.5,  0.0, -0.5],
+    [-1.0,  0.5,  0.5,  0.5,  0.5,  0.5,  0.0, -1.0],
+    [-1.0,  0.0,  0.5,  0.0,  0.0,  0.0,  0.0, -1.0],
+    [-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0]
+]
+
+king_eval_white = [
+    [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [-3.0, -4.0, -4.0, -5.0, -5.0, -4.0, -4.0, -3.0],
+    [-2.0, -3.0, -3.0, -4.0, -4.0, -3.0, -3.0, -2.0],
+    [-1.0, -2.0, -2.0, -2.0, -2.0, -2.0, -2.0, -1.0],
+    [2.0,  2.0,  0.0,  0.0,  0.0,  0.0,  2.0,  2.0],
+    [2.0,  3.0,  1.0,  0.0,  0.0,  1.0,  3.0,  2.0]
+]
+
+king_eval_black = reverse_array(king_eval_white)
+
 def get_point_from_board(): #calculate the point of the board
     update_board()
     point = 0
     for i in range(0, 8):
         for j in range(0, 8):
-            if Static.board[i][j] == 'P': point += 10
-            elif Static.board[i][j] == 'R': point += 50
-            elif Static.board[i][j] == 'N': point += 30
-            elif Static.board[i][j] == 'B': point += 30
-            elif Static.board[i][j] == 'Q': point += 90
-            elif Static.board[i][j] == 'K': point += 900
-            elif Static.board[i][j] == 'p': point -= 10
-            elif Static.board[i][j] == 'r': point -= 50
-            elif Static.board[i][j] == 'n': point -= 30
-            elif Static.board[i][j] == 'b': point -= 30
-            elif Static.board[i][j] == 'q': point -= 90
-            elif Static.board[i][j] == 'k': point -= 900
+            if Static.board[i][j] == 'P': point += 10 + pawn_eval_black[j][i] 
+            elif Static.board[i][j] == 'R': point += 50 + rook_eval_black[j][i]
+            elif Static.board[i][j] == 'N': point += 30 + knight_eval[j][i]
+            elif Static.board[i][j] == 'B': point += 30 + bishop_eval_black[j][i]
+            elif Static.board[i][j] == 'Q': point += 90 + eval_queen[j][i]
+            elif Static.board[i][j] == 'K': point += 900 + king_eval_black[j][i]
+            elif Static.board[i][j] == 'p': point -= 10 + pawn_eval_white[j][i]
+            elif Static.board[i][j] == 'r': point -= 50 + rook_eval_white[j][i]
+            elif Static.board[i][j] == 'n': point -= 30 + knight_eval[j][i]
+            elif Static.board[i][j] == 'b': point -= 30 + bishop_eval_white[j][i]
+            elif Static.board[i][j] == 'q': point -= 90 + eval_queen[j][i]
+            elif Static.board[i][j] == 'k': point -= 900 + king_eval_white[j][i]
     return point
 
 def minimax(depth, a, b, maximizingPlayer, dodgeDraw):
@@ -199,7 +277,6 @@ def attack_king(): #put the opponent's king in checkmate, promote a pawn to a qu
     list_move.sort(key = keyOfSort, reverse = True)
     return list_move[0]
 
-
 def Bot5(isWhite, depth = 3):
     point = get_point_from_board()
     
@@ -237,9 +314,13 @@ class Player:
     move = ''
     lastClick = []  
     def draw_last_click():
-        yellow = (200, 200, 0)
+        
         if len(Player.lastClick) > 0:
-            pg.draw.rect(screen, yellow, ((100 + Player.lastClick[0] * 60, 10 + Player.lastClick[1] * 60), (60, 60))) 
+            if (Player.lastClick[0] % 2 == 0 and Player.lastClick[1] % 2 == 0) or (Player.lastClick[0] % 2 != 0 and Player.lastClick[1] % 2 != 0):
+                color = grey
+            else:
+                color = light
+            pg.draw.rect(screen, color, ((100 + Player.lastClick[0] * 60, 10 + Player.lastClick[1] * 60), (60, 60))) 
 
 
 
@@ -306,6 +387,9 @@ def playing_choice():
         pg.display.update()
         
 def playing(turn = 0):
+    screen.blit(playing_bg, (0, 0))
+    draw_chess_board()
+    
     #turn = 0, Player is White else Bot is White
     update_board()
     Static.stop = False
@@ -341,9 +425,39 @@ def playing(turn = 0):
                 if (mx < 1 or mx > 8) or (my < 1 or my > 8):
                     break  
                 if len(Player.lastClick) == 0:
-                    Player.stL = character[mx - 1].lower() + str(9 - my)
+                    Player.stL = character[mx - 1].lower() + str(9 - my) #value for initial click
                     Player.lastClick = [mx, my]
+                    
+                    # Get all legal moves for the selected piece
+                    legal_moves = [move for move in board.legal_moves if move.uci()[:2] == Player.stL]                  
+                    
+                    # Draw a rectangle on each legal move square
+                    for mov in legal_moves:
+                        # print(mov.uci(), mov.uci()[:2], mov.uci()[2:])
+                        
+                        # end_square = move.uci()[2:]
+                        # end_x = character.index(end_square[0].upper()) + 1
+                        # end_y = 9 - int(end_square[1])
+                        # pg.draw.rect(screen, (127, 127, 127), ((100 + move.uci()[:2] * 60, 10 + move.uci()[2:] * 60), (60, 60)))
+                        
+                        move = mov.uci() #string
+                        start = [0, 0]
+                        end = [0, 0]
+                        start[0] = ord(move[0]) - ord('a') + 1
+                        start[1] = 9 - ord(move[1]) + ord('0')
+                        end[0] = ord(move[2]) - ord('a') + 1
+                        end[1] = 9 - ord(move[3]) + ord('0')
+                        
+                        # print(start, end)
+                        
+                        if (end[0] % 2 == 0 and end[1] % 2 == 0) or (end[0] % 2 != 0 and end[1] % 2 != 0):
+                            color = grey
+                        else:
+                            color = light
+                        pg.draw.rect(screen, color, ((100 + end[0] * 60, 10 + end[1] * 60), (60, 60)))
+                            
                 else:
+                    
                     Player.edL = character[mx - 1].lower() + str(9 - my)
                     Player.lastClick = []
                     if Player.stL != Player.edL:
@@ -371,10 +485,12 @@ def playing(turn = 0):
                                 Static.stop = True
                                 break
                             #Bot here
-                            callBot(Static.curr_bot, turn == 1) 
+                            callBot(Static.curr_bot, turn == 1)
+                            draw_chess_board()
                             update_board()
-        screen.blit(playing_bg, (0, 0))
-        draw_chess_board()   
+                    else:
+                        draw_chess_board() 
+        
         LastMove.draw()
         Player.draw_last_click()
         draw_chess()
