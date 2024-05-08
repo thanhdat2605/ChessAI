@@ -213,6 +213,7 @@ def is_end_game():
         return True
     elif 'q' in Static.board and 'Q' in Static.board:
         if board.fen().count('b') + board.fen().count('n') <= 1 and board.fen().count('B') + board.fen().count('N') <= 1:
+        # if Static.board.count('b') + Static.board.count('n') <= 1 and Static.board.count('B') + Static.board.count('N') <= 1:
             return True
         elif not ('b' in Static.board and 'n' in Static.board and 'r' in Static.board and 'p' in Static.board 
                   and 'B' in Static.board and 'N' in Static.board and 'R' in Static.board and 'P' in Static.board):
@@ -286,7 +287,9 @@ def minimax(depth, a, b, maximizingPlayer, dodgeDraw):
 def keyOfSort(arr): #choose the most priority move to win
     return arr[0]
 
-def attack_king(): #put the opponent's king in checkmate, promote a pawn to a queen, capture an opponent's piece, move a piece to a lower lettered file (column).
+ # put the opponent's king in checkmate, promote a pawn to a queen, 
+ # capture an opponent's piece, move a piece to a lower lettered file (column).
+def attack_king():
     legal_moves = board.legal_moves.__str__()[38:-2].split(', ')
     list_move = []
     for move in legal_moves:
@@ -358,9 +361,9 @@ class Player:
     move = ''
     lastClick = []  
     def draw_last_click():
-        
         if len(Player.lastClick) > 0:
-            if (Player.lastClick[0] % 2 == 0 and Player.lastClick[1] % 2 == 0) or (Player.lastClick[0] % 2 != 0 and Player.lastClick[1] % 2 != 0):
+            if ((Player.lastClick[0] % 2 == 0 and Player.lastClick[1] % 2 == 0) 
+                or (Player.lastClick[0] % 2 != 0 and Player.lastClick[1] % 2 != 0)):
                 color = grey
             else:
                 color = light
@@ -656,17 +659,8 @@ def playing(turn = 0):
         
 def BotSoloBot(turn = 0):
     Static.stop = False
-    mode = rd.randint(1, 2)
-    bot = ''
-    if mode == 1:
-        bot = 'Bot1'
-    elif mode == 2:
-        bot = 'Bot2'
-    elif mode == 3:
-        bot = 'Bot3'
-    
     if turn == 1:
-        callBot(bot, True)
+        callBot('Bot1', True)
     Run = True
     while Run:
         for event in pg.event.get():
@@ -694,7 +688,7 @@ def BotSoloBot(turn = 0):
         if not Static.stop:
             callBot('Bot5', turn == 0) 
             if not Static.stop:
-                callBot(bot, turn == 1)
+                callBot('Bot1', turn == 1)
         if Static.stop: return False
         draw_chess_board() 
         LastMove.draw()  
