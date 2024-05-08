@@ -6,7 +6,7 @@ rd.seed(time.time())
 
 board = chess.Board()
 
-grey = (105, 105, 105) # (127, 127, 127)
+grey = (105, 105, 105)
 light = (169, 169, 169)
 class Static:
     board = []
@@ -209,12 +209,13 @@ eval_king_end = [
 ]
 
 def is_end_game():
-    if not 'q' in board.fen() and not 'Q' in board.fen():
+    if not 'q' in Static.board and not 'Q' in Static.board:
         return True
-    elif 'q' in board.fen() and 'Q' in board.fen():
+    elif 'q' in Static.board and 'Q' in Static.board:
         if board.fen().count('b') + board.fen().count('n') <= 1 and board.fen().count('B') + board.fen().count('N') <= 1:
             return True
-        elif board.fen().count('b') + board.fen().count('n') + board.fen().count('r') + board.fen().count('p') + board.fen().count('B') + board.fen().count('N') + board.fen().count('R') + board.fen().count('P') == 0:
+        elif not ('b' in Static.board and 'n' in Static.board and 'r' in Static.board and 'p' in Static.board 
+                  and 'B' in Static.board and 'N' in Static.board and 'R' in Static.board and 'P' in Static.board):
             return True
     return False
 
@@ -223,12 +224,6 @@ def get_point_from_board(): #calculate the point of the board
     point = 0
     for i in range(0, 8):
         for j in range(0, 8):
-            # if is_end_game():
-            #     if Static.board[i][j] == 'K': point += 2000 + eval_king_end[j][i]
-            #     elif Static.board[i][j] == 'k': point -= 2000 + eval_king_end[j][i]
-            # else:
-            #     if Static.board[i][j] == 'K': point += 2000 + king_eval_black[j][i]
-            #     elif Static.board[i][j] == 'k': point -= 2000 + king_eval_white[j][i]
             if Static.board[i][j] == 'P': point += 10 + pawn_eval_black[j][i] 
             elif Static.board[i][j] == 'R': point += 50 + rook_eval_black[j][i]
             elif Static.board[i][j] == 'N': point += 32 + knight_eval[j][i]
@@ -661,8 +656,17 @@ def playing(turn = 0):
         
 def BotSoloBot(turn = 0):
     Static.stop = False
+    mode = rd.randint(1, 2)
+    bot = ''
+    if mode == 1:
+        bot = 'Bot1'
+    elif mode == 2:
+        bot = 'Bot2'
+    elif mode == 3:
+        bot = 'Bot3'
+    
     if turn == 1:
-        callBot('Bot1', True)
+        callBot(bot, True)
     Run = True
     while Run:
         for event in pg.event.get():
@@ -690,7 +694,7 @@ def BotSoloBot(turn = 0):
         if not Static.stop:
             callBot('Bot5', turn == 0) 
             if not Static.stop:
-                callBot('Bot1', turn == 1)
+                callBot(bot, turn == 1)
         if Static.stop: return False
         draw_chess_board() 
         LastMove.draw()  
