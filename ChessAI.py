@@ -229,19 +229,18 @@ def get_point_from_board(): #calculate the point of the board
             # else:
             #     if Static.board[i][j] == 'K': point += 2000 + king_eval_black[j][i]
             #     elif Static.board[i][j] == 'k': point -= 2000 + king_eval_white[j][i]
-                
             if Static.board[i][j] == 'P': point += 10 + pawn_eval_black[j][i] 
             elif Static.board[i][j] == 'R': point += 50 + rook_eval_black[j][i]
             elif Static.board[i][j] == 'N': point += 32 + knight_eval[j][i]
             elif Static.board[i][j] == 'B': point += 33 + bishop_eval_black[j][i]
             elif Static.board[i][j] == 'Q': point += 90 + eval_queen[j][i]
-            elif Static.board[i][j] == 'K': point += (2000 + eval_king_end[j][i] if is_end_game else 2000 + king_eval_black[j][i])
+            elif Static.board[i][j] == 'K': point += (2000 + eval_king_end[j][i] if is_end_game() else 2000 + king_eval_black[j][i])
             elif Static.board[i][j] == 'p': point -= 10 + pawn_eval_white[j][i]
             elif Static.board[i][j] == 'r': point -= 50 + rook_eval_white[j][i]
             elif Static.board[i][j] == 'n': point -= 32 + knight_eval[j][i]
             elif Static.board[i][j] == 'b': point -= 33 + bishop_eval_white[j][i]
             elif Static.board[i][j] == 'q': point -= 90 + eval_queen[j][i]
-            elif Static.board[i][j] == 'k': point -= (2000 + eval_king_end[j][i] if is_end_game else 2000 + king_eval_white[j][i])
+            elif Static.board[i][j] == 'k': point -= (2000 + eval_king_end[j][i] if is_end_game() else 2000 + king_eval_white[j][i])
     return point
 
 def minimax(depth, a, b, maximizingPlayer, dodgeDraw):
@@ -335,12 +334,12 @@ def Bot5(isWhite, depth = 3):
         else:
             print("Black win (Bot)")
             
-        if not isWhite: #move the last Bot move for Bot win
-            draw_chess_board()
-            update_board()
-            LastMove.draw()
-            draw_chess()
-            pg.display.update()
+        #move the last Bot move for Bot win
+        draw_chess_board()
+        update_board()
+        LastMove.draw()
+        draw_chess()
+        pg.display.update()
             
         Static.stop = True
         show_notification("White" if isWhite else "Black")
@@ -616,6 +615,13 @@ def playing(turn = 0):
                                         print("White win (You)")
                                     else:
                                         print("Black win (You)")
+                                    
+                                    draw_chess_board()
+                                    update_board()
+                                    Player.draw_last_click()
+                                    draw_chess()
+                                    pg.display.update()    
+                                    
                                     Static.stop = True
                                     show_notification("White" if turn == 0 else "Black")
                                     return False
@@ -629,8 +635,10 @@ def playing(turn = 0):
                                 #Bot here
                                 if Static.curr_bot == 'Bot5':
                                     if board.fen().count('q') + board.fen().count('r') + board.fen().count('b') + board.fen().count('n') + board.fen().count('p') < 8:
+                                        # print('Bot5*Black')
                                         callBot('Bot5*', turn == 1)
                                     elif board.fen().count('Q') + board.fen().count('R') + board.fen().count('B') + board.fen().count('N') + board.fen().count('P') < 8:
+                                        # print('Bot5*White')
                                         callBot('Bot5*', turn == 1)
                                     else:
                                         callBot(Static.curr_bot, turn == 1)
