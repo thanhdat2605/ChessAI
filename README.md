@@ -1,3 +1,9 @@
+﻿# ChessAI
+
+## Table of contents
+* [General info](#general-info)
+* [Application description](#application-description)
+
 ## General Info
 Chess AI is a simple chess game application designed for everyone with user-friendly interface. The game features 4 difficulty levels ranging from very easy, easy, medium, to hard.
 
