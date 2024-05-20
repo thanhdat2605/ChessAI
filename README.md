@@ -15,3 +15,6 @@ Chess AI is a simple chess game application designed for everyone with user-frie
 <p align="center">
   <img src="/images/start.png" alt="Start screen of ChessAI" width=400/>
 </p>
+<p align="center">
+  <img src="/images/demoChess.png" alt="Start screen of ChessAI" width=400/>
+</p>
