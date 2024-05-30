@@ -2,7 +2,10 @@ from pygame.display import update
 import chess, time
 import numpy as np
 import random as rd
+from tensorflow.keras.models import load_model
 rd.seed(time.time())
+
+model = load_model('model.h5')
 
 board = chess.Board()
 
@@ -243,17 +246,17 @@ def minimax(depth, a, b, maximizingPlayer, dodgeDraw):
     if depth == 0:
         return [get_point_from_board(), 'NULL']
     
-    if isDraw():
-        if dodgeDraw:
-            return [-4500, 'NULL']
-        else:
-            return [4500, 'NULL']
-        
     if board.is_checkmate():
         if board.legal_moves.count() == 1:
             return [9000, 'NULL'] #White win
         else:
             return [-9000, 'NULL']
+    
+    if isDraw():
+        if dodgeDraw:
+            return [-4500, 'NULL']
+        else:
+            return [4500, 'NULL']
         
     if maximizingPlayer:
         maxEval = -9000
@@ -296,9 +299,9 @@ def attack_king():
         if '#' in move:
             return [9999, move] 
         elif '=Q' in move:
-            list_move.append([200, move]) # 100
-        elif 'x' in move:
-            list_move.append([20, move])
+            list_move.append([100, move]) # 100
+        # elif 'x' in move:
+        #     list_move.append([20, move])
         elif ord(move[0]) >= ord('a') and ord(move[0]) <= ord('h'):
             list_move.append([10, move])
         else:
@@ -306,21 +309,81 @@ def attack_king():
     list_move.sort(key = keyOfSort, reverse = True)
     return list_move[0]
 
+def encode_board(board):
+    # first lets turn the board into a string
+    board_str = str(board)
+    # then lets remove all the spaces
+    material_dict = {
+        'p': -1,
+        'b': -3.5,
+        'n': -3,
+        'r': -5,
+        'q': -9,
+        'k': -4,
+        'K': 4,
+        '.': 0,
+        'P': 10,
+        'B': 3.5,
+        'N': 3,
+        'R': 5,
+        'Q': 9,
+    }
+    board_str = board_str.replace(' ', '')
+    board_list = []
+    for row in board_str.split('\n'):
+        row_list = []
+        for piece in row:
+            # print(piece)
+            row_list.append(material_dict.get(piece))
+        board_list.append(row_list)
+    return np.array(board_list)
+
 def Bot5(isWhite, depth = 3):
     point = get_point_from_board()
     
-    if (isWhite and point >= 100) or (not isWhite and point <= -100):
+    if (isWhite and point >= 100) or (not isWhite and point <= -100) or (): #100
         m = attack_king()
         board.push_san(m[1])
         LastMove.move = board.peek().__str__()
+        print("Move", ":", board.peek().__str__())
     else:
-        move = minimax(depth, -10000, 10000, isWhite, isWhite)
-        try:
-            move_chess(chess.Move.from_uci(move[1].split('->')[0]))
-        except: #foresee a loss in 2 more moves
-            move = minimax(depth - 2, -10000, 10000, isWhite, isWhite)
-            move_chess(chess.Move.from_uci(move[1].split('->')[0]))
-            print('Error')
+    # print("Legal moves: ", board.legal_moves.__str__()[38:-2].split(', '))
+        # # move = minimax(depth, -10000, 10000, isWhite, isWhite)
+    # if move[1] == 'NULL':
+    #     legal_moves = board.legal_moves.__str__()[38:-2].split(', ')
+    #     move_chess(legal_moves)
+    # else:
+    #     print("move", ': ', move, chess.Move.from_uci(move[1].split('->')[0]))
+    #     move_chess(chess.Move.from_uci(move[1].split('->')[0]))
+        best_score = -10000
+        best_move = None
+        print("Legal moves: ", board.legal_moves)
+        for legal_move in board.legal_moves:
+            legal_move = legal_move.uci()
+            
+            candidate_board = board.copy()
+            candidate_board.push_uci(legal_move)
+            input_vector = encode_board(str(candidate_board)).astype(np.int32)
+            
+            # This is where our model gets to shine! It tells us how good the resultant score board is for black:
+            score = model.predict(np.expand_dims(input_vector, axis=0), verbose=0)[0][0]
+            # score = model.predict(np.array([board_to_array(board)]))
+            if score > best_score:
+                best_score = score
+                best_move = legal_move
+            print("Move", ":", legal_move)
+            print("Score", ":", score)
+    
+        move_chess(chess.Move.from_uci(best_move))
+    
+        # try:
+        #     print("move", ': ', move, chess.Move.from_uci(move[1].split('->')[0]))
+        #     move_chess(chess.Move.from_uci(move[1].split('->')[0]))
+        # except: #foresee a loss in 2 more moves
+        #     movee = minimax(depth - 2, -10000, 10000, isWhite, isWhite)
+        #     print("MOVE", ': ', movee, chess.Move.from_uci(movee[1].split('->')[0]))
+        #     move_chess(chess.Move.from_uci(movee[1].split('->')[0]))
+        #     print('Error')
     update_board()
     if isDraw():
         print("DRAW")
